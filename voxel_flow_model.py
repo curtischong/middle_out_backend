@@ -75,8 +75,8 @@ class Voxel_flow_model(object):
 
     print("about to create mesh")
     grid_x, grid_y = meshgrid(256, 256)
-    grid_x = tf.tile(grid_x, [73, 1, 1])  # batch_size = 32
-    grid_y = tf.tile(grid_y, [73, 1, 1])  # batch_size = 32
+    grid_x = tf.tile(grid_x, [3, 1, 1])  # batch_size = 32
+    grid_y = tf.tile(grid_y, [3, 1, 1])  # batch_size = 32
 
     flow = 0.5 * flow
 

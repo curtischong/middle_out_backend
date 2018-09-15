@@ -29,7 +29,7 @@ tf.app.flags.DEFINE_string('pretrained_model_checkpoint_path', './voxel_flow_che
 tf.app.flags.DEFINE_integer('max_steps', 10000000,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_integer(
-        'batch_size', 73, 'The number of samples in each batch.')
+        'batch_size', 3, 'The number of samples in each batch.')
 tf.app.flags.DEFINE_float('initial_learning_rate', 0.0003,
                           """Initial learning rate.""")
 
@@ -108,8 +108,8 @@ print(x2.shape)
 
 with tf.Graph().as_default():
     # Create input and target placeholder.
-    input_placeholder = tf.placeholder(tf.float32, shape=(None, 256, 256, 2))
-    target_placeholder = tf.placeholder(tf.float32, shape=(None, 256, 256, 1))
+    input_placeholder = tf.placeholder(tf.float32, shape=(3, 256, 256, 2))
+    target_placeholder = tf.placeholder(tf.float32, shape=(3, 256, 256, 1))
 
     # input_resized = tf.image.resize_area(input_placeholder, [128, 128])
     # target_resized = tf.image.resize_area(target_placeholder,[128, 128])
@@ -214,16 +214,22 @@ with tf.Graph().as_default():
           [dataset_frame2.process_func(line) for line in batch_data_list_frame2])
       batch_data_frame3 = np.array(
           [dataset_frame3.process_func(line) for line in batch_data_list_frame3])"""
-      batch_data_frame1 = data_list_frame1
-      batch_data_frame2 = data_list_frame2
-      batch_data_frame3 = data_list_frame3
+      batch_data_frame1 = batch_data_list_frame1
+      batch_data_frame2 = batch_data_list_frame2
+      batch_data_frame3 = batch_data_list_frame3
 
       # batch_data_frame1 = p_queue_frame1.get_batch()
       # batch_data_frame2 = p_queue_frame2.get_batch()
       # batch_data_frame3 = p_queue_frame3.get_batch()
 
+      p = np.random.permutation(3)
+      data_list_frame1 = x1[p]#np.expand_dims(x1[p], axis=3)
+      data_list_frame2 = target[p]#np.expand_dims(target[p], axis=3)
+      data_list_frame3 = x2[p]#np.expand_dims(x2[p], axis=3)
+
       feed_dict = {input_placeholder: np.concatenate(
           (batch_data_frame1, batch_data_frame3), 3), target_placeholder: batch_data_frame2}
+
 
       # Run single step update.
       _, loss_value = sess.run([update_op, total_loss], feed_dict=feed_dict)
@@ -231,7 +237,7 @@ with tf.Graph().as_default():
       if batch_idx == 0:
         # Shuffle data at each epoch.
         #random.seed(1)
-        p = np.random.permutation(len(x1))
+        p = np.random.permutation(3)
         data_list_frame1 = x1[p]#np.expand_dims(x1[p], axis=3)
         data_list_frame2 = target[p]#np.expand_dims(target[p], axis=3)
         data_list_frame3 = x2[p]#np.expand_dims(x2[p], axis=3)
