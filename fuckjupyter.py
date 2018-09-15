@@ -93,8 +93,8 @@ x = np.stack((x1,x2), axis=3)
 
 with tf.Graph().as_default():
     # Create input and target placeholder.
-    input_placeholder = tf.placeholder(tf.float32, shape=(None, 256, 256, 2))
-    target_placeholder = tf.placeholder(tf.float32, shape=(None, 256, 256, 1))
+    input_placeholder = tf.placeholder(tf.float32, shape=(None, 1280, 720, 2))
+    target_placeholder = tf.placeholder(tf.float32, shape=(None, 1280, 720, 1))
 
     # input_resized = tf.image.resize_area(input_placeholder, [128, 128])
     # target_resized = tf.image.resize_area(target_placeholder,[128, 128])
@@ -159,9 +159,12 @@ with tf.Graph().as_default():
     shuffle(data_list_frame3)"""
 
     p = np.random.permutation(len(x1))
-    data_list_frame1 = np.expand_dims(x1[p], axis=3)
-    data_list_frame2 = np.expand_dims(target[p], axis=3)
-    data_list_frame3 = np.expand_dims(x2[p], axis=3)
+    data_list_frame1 = x1[p]#np.expand_dims(x1[p], axis=3)
+    data_list_frame2 = target[p]#np.expand_dims(target[p], axis=3)
+    data_list_frame3 = x2[p]#np.expand_dims(x2[p], axis=3)
+    print(data_list_frame1.shape)
+    print(data_list_frame2.shape)
+    print(data_list_frame3.shape)
 
 
 
@@ -193,12 +196,12 @@ with tf.Graph().as_default():
           batch_idx * FLAGS.batch_size): int((batch_idx + 1) * FLAGS.batch_size)]
 
       # Load batch data.
-      batch_data_frame1 = np.array(
-          [dataset_frame1.process_func(line) for line in batch_data_list_frame1])
-      batch_data_frame2 = np.array(
-          [dataset_frame2.process_func(line) for line in batch_data_list_frame2])
-      batch_data_frame3 = np.array(
-          [dataset_frame3.process_func(line) for line in batch_data_list_frame3])
+      batch_data_frame1 = data_list_frame1#np.array(
+          #[dataset_frame1.process_func(line) for line in batch_data_list_frame1])
+      batch_data_frame2 = data_list_frame2#np.array(
+          #[dataset_frame2.process_func(line) for line in batch_data_list_frame2])
+      batch_data_frame3 = data_list_frame3 #np.array(
+          #[dataset_frame3.process_func(line) for line in batch_data_list_frame3])
 
       # batch_data_frame1 = p_queue_frame1.get_batch()
       # batch_data_frame2 = p_queue_frame2.get_batch()

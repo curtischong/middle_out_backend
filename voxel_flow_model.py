@@ -65,15 +65,22 @@ class Voxel_flow_model(object):
           net = slim.conv2d(net, 256, [3, 3], stride=1, scope='conv4')
           net = tf.image.resize_bilinear(net, [128, 128])
           net = slim.conv2d(net, 128, [3, 3], stride=1, scope='conv5')
-          net = tf.image.resize_bilinear(net, [256, 256])
+          net = tf.image.resize_bilinear(net, [1280, 720])
           net = slim.conv2d(net, 64, [5, 5], stride=1, scope='conv6')
-    net = slim.conv2d(net, 3, [5, 5], stride=1, activation_fn=tf.tanh,
+    net = slim.conv2d(net, 2, [5, 5], stride=1, activation_fn=tf.tanh,
                       normalizer_fn=None, scope='conv7')
 
-    flow = net[:, :, :, 0:2]
-    mask = tf.expand_dims(net[:, :, :, 2], 3)
+    print("shape of net: ")
+    print(net.shape)
+    flow = net[:, :, :, 0:2] # I think I need this to be the right dimension because it is added to other matrixes
+    print("shape of flow: ")
+    print(flow.shape)
+    print(flow[:, :, :, 0].shape)
+    mask = tf.expand_dims(net[:, :, :, 2], 2)
 
-    grid_x, grid_y = meshgrid(256, 256)
+    print("calculating meshgrid")
+    grid_x, grid_y = meshgrid(1280, 720)
+    print(grid_y.shape)
     grid_x = tf.tile(grid_x, [32, 1, 1])  # batch_size = 32
     grid_y = tf.tile(grid_y, [32, 1, 1])  # batch_size = 32
 
