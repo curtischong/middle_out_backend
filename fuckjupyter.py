@@ -3,6 +3,10 @@ import os
 import re
 import tensorflow as tf
 from voxel_flow_model import Voxel_flow_model
+
+IMG_WIDTH = 256
+IMG_HEIGHT = 256
+
 np.set_printoptions(threshold=np.nan)
 
 
@@ -65,6 +69,16 @@ for x in onlyfiles:
     newFrame(input_path + "/" + x)
 
 frames = np.array(frames)
+print("DIMENSIONS OF INPUT")
+print(frames.shape)
+
+#crop to center of image
+# I might want an assert statement to make sure that the dimensions fit the input.
+#note: I think the input of the data is actually in the wrong orientation. it should be 720,1080
+offset_left = int((frames.shape[1] - IMG_WIDTH)/2)
+offset_top = int((frames.shape[2] - IMG_HEIGHT)/2)
+frames = frames[:,offset_left : (offset_left + IMG_WIDTH), offset_top : (offset_top + IMG_HEIGHT), :]
+print(frames.shape)
 
 target = []
 x1 = []
@@ -88,7 +102,7 @@ print(target.shape)
 print(x1.shape)
 print(x2.shape)
 
-x = np.stack((x1,x2), axis=3)
+#x = np.stack((x1,x2), axis=3)
 
 
 with tf.Graph().as_default():
@@ -159,9 +173,9 @@ with tf.Graph().as_default():
     shuffle(data_list_frame3)"""
 
     p = np.random.permutation(len(x1))
-    data_list_frame1 = np.expand_dims(x1[p], axis=3)
-    data_list_frame2 = np.expand_dims(target[p], axis=3)
-    data_list_frame3 = np.expand_dims(x2[p], axis=3)
+    data_list_frame1 = x1[p]#np.expand_dims(x1[p], axis=3)
+    data_list_frame2 = target[p]#np.expand_dims(target[p], axis=3)
+    data_list_frame3 = x2[p]#np.expand_dims(x2[p], axis=3)
 
 
 
@@ -193,12 +207,15 @@ with tf.Graph().as_default():
           batch_idx * FLAGS.batch_size): int((batch_idx + 1) * FLAGS.batch_size)]
 
       # Load batch data.
-      batch_data_frame1 = np.array(
+      """batch_data_frame1 = np.array(
           [dataset_frame1.process_func(line) for line in batch_data_list_frame1])
       batch_data_frame2 = np.array(
           [dataset_frame2.process_func(line) for line in batch_data_list_frame2])
       batch_data_frame3 = np.array(
-          [dataset_frame3.process_func(line) for line in batch_data_list_frame3])
+          [dataset_frame3.process_func(line) for line in batch_data_list_frame3])"""
+      batch_data_frame1 = data_list_frame1
+      batch_data_frame2 = data_list_frame2
+      batch_data_frame3 = data_list_frame3
 
       # batch_data_frame1 = p_queue_frame1.get_batch()
       # batch_data_frame2 = p_queue_frame2.get_batch()
