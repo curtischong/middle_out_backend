@@ -4,6 +4,7 @@ import re
 import tensorflow as tf
 from voxel_flow_model import Voxel_flow_model
 from utils.image_utils import imwrite
+import sys
 
 IMG_WIDTH = 256
 IMG_HEIGHT = 256
@@ -52,8 +53,31 @@ from numpy import*
 
 frames = []
 def newFrame(cur_filepath):
+    # Convert image to black and white
     img = Image.open(cur_filepath).convert('1')
-    frames.append(array(img.getdata()).reshape(img.size[0], img.size[1], 1))
+    # Pad image with whitespace
+    max_size = max(img.size[0], img.size[1])
+    new_size = (max_size, max_size)
+    padded = Image.new('1', new_size, 255)
+    padded.paste(img, ((new_size[0]-img.size[0])//2, (new_size[1]-img.size[1])//2))
+    # Scale image to 256/256
+    padded.thumbnail((256,256))
+    #padded.show()
+    #sys.exit(1)
+    # Add frame array to list
+    #print(array(padded.getdata(), uint8).reshape(256, 256, 1))
+    frames.append(array(padded.getdata(), uint8).reshape(256, 256, 1))
+    #test_array = array(padded.getdata(), uint8).reshape(256, 256, 1)
+    #print(test_array.shape)
+    #test_array = test_array.reshape([720, 1280])
+    #img.show()
+    #Image.fromarray(test_array.reshape([256, 256])).show()
+    #sys.exit(1)
+    #Image.fromarray(test_array.reshape([720, 1280])).show()
+    #Image.fromarray(test_array, '1').show()
+    #Image.fromarray(test_array.transpose(), '1').show()
+    #sys.exit(1)
+    #img.show()
 
 for x in onlyfiles:
     newFrame(input_path + "/" + x)
@@ -63,15 +87,30 @@ frames = np.array(frames)
 # crop to center of image
 # I might want an assert statement to make sure that the dimensions fit the input.
 #note: I think the input of the data is actually in the wrong orientation. it should be 720,1080
-offset_left = int((frames.shape[1] - IMG_WIDTH)/2)
-offset_top = int((frames.shape[2] - IMG_HEIGHT)/2)
-frames = frames[:,offset_left : (offset_left + IMG_WIDTH), offset_top : (offset_top + IMG_HEIGHT), :]
+#offset_left = int((frames.shape[1] - IMG_WIDTH)/2)
+#offset_top = int((frames.shape[2] - IMG_HEIGHT)/2)
+#frames = frames[:,offset_left : (offset_left + IMG_WIDTH), offset_top : (offset_top + IMG_HEIGHT), :]
+#Image.fromarray(frames[0].reshape([256, 256])).show()
+#sys.exit(1)
+
+#REMEMBER TO CHANGE THE imwrite function!!!!!!
+
+for i in range(len(frames)):
+    file_name = "input_pics/"+str(i)+'_input.png'
+    print(frames[i, :, :, :].shape)
+    imwrite(file_name, frames[i, :, :, :])
+
+
+
+
+
+
+
 
 target = []
 x1 = []
 x2 = []
 def middle_out(frame1, frame2, frame3):
-
     target.append(frame2)
     x1.append(frame1)
     x2.append(frame3)

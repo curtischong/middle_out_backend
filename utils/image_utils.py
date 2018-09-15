@@ -32,9 +32,11 @@ def imwrite(filename, np_image):
     filename: .
     np_image: .
   """
-  # im = sp.misc.toimage(np_image, cmin=0, cmax=1.0)
-  im = sp.misc.toimage(np_image.reshape(256,256), cmin=-1.0, cmax=1.0)
-  im.save(filename)
+  #im = sp.misc.toimage(np_image, cmin=0, cmax=1.0)
+  #im = sp.misc.toimage(np_image.reshape(256,256), cmin=-1.0, cmax=1.0)
+  #im = sp.misc.toimage(np_image.reshape(1280,720), cmin=-1.0, cmax=1.0)
+  im = Image.fromarray(np_image.reshape([256, 256]))
+  im.convert('RGB').save(filename)
 
 def imwrite_batch(filenames, np_images):
   """Save batch images to file.
