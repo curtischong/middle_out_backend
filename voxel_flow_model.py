@@ -75,8 +75,8 @@ class Voxel_flow_model(object):
 
     print("about to create mesh")
     grid_x, grid_y = meshgrid(256, 256)
-    grid_x = tf.tile(grid_x, [32, 1, 1])  # batch_size = 32
-    grid_y = tf.tile(grid_y, [32, 1, 1])  # batch_size = 32
+    grid_x = tf.tile(grid_x, [73, 1, 1])  # batch_size = 32
+    grid_y = tf.tile(grid_y, [73, 1, 1])  # batch_size = 32
 
     flow = 0.5 * flow
 
@@ -105,8 +105,9 @@ class Voxel_flow_model(object):
 
 
     mask = 0.5 * (1.0 + mask)
-    mask = tf.tile(mask, [1, 1, 1, 2])
+    mask = tf.tile(mask, [1, 1, 1, 1])
     net = tf.multiply(mask, output_1) + tf.multiply(1.0 - mask, output_2)
     print(net)
-
+    print("the shape of the neural net")
+    print(net.get_shape())
     return net

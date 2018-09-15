@@ -3,6 +3,7 @@ import os
 import re
 import tensorflow as tf
 from voxel_flow_model import Voxel_flow_model
+from utils.image_utils import imwrite
 
 IMG_WIDTH = 256
 IMG_HEIGHT = 256
@@ -28,7 +29,7 @@ tf.app.flags.DEFINE_string('pretrained_model_checkpoint_path', './voxel_flow_che
 tf.app.flags.DEFINE_integer('max_steps', 10000000,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_integer(
-        'batch_size', 32, 'The number of samples in each batch.')
+        'batch_size', 73, 'The number of samples in each batch.')
 tf.app.flags.DEFINE_float('initial_learning_rate', 0.0003,
                           """Initial learning rate.""")
 

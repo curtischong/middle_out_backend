@@ -17,6 +17,9 @@ def l1_loss(predictions, targets):
       * tf.shape(targets)[3])
   total_elements = tf.to_float(total_elements)
 
+  print("loss dimensions")
+  print(predictions.get_shape())
+  print(targets.get_shape())
   loss = tf.reduce_sum(tf.abs(predictions- targets))
   loss = tf.div(loss, total_elements)
   return loss
