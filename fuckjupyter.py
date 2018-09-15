@@ -182,7 +182,7 @@ with tf.Graph().as_default():
 
 
     data_size = len(data_list_frame1)
-    epoch_num = int(data_size / FLAGS.batch_size)
+    epoch_num = 3#int(data_size / FLAGS.batch_size)
 
     # num_workers = 1
 

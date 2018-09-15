@@ -33,8 +33,7 @@ def imwrite(filename, np_image):
     np_image: .
   """
   # im = sp.misc.toimage(np_image, cmin=0, cmax=1.0)
-  print(np_image.shape)
-  im = sp.misc.toimage(np_image, cmin=-1.0, cmax=1.0)
+  im = sp.misc.toimage(np_image.reshape(256,256), cmin=-1.0, cmax=1.0)
   im.save(filename)
 
 def imwrite_batch(filenames, np_images):
