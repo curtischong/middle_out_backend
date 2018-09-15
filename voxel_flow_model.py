@@ -73,11 +73,16 @@ class Voxel_flow_model(object):
     flow = net[:, :, :, 0:2]
     mask = tf.expand_dims(net[:, :, :, 2], 3)
 
+    print("about to create mesh")
     grid_x, grid_y = meshgrid(256, 256)
     grid_x = tf.tile(grid_x, [32, 1, 1])  # batch_size = 32
     grid_y = tf.tile(grid_y, [32, 1, 1])  # batch_size = 32
 
     flow = 0.5 * flow
+
+    print("still running")
+    print(grid_x.shape)
+    print(flow.shape)
 
     coor_x_1 = grid_x + flow[:, :, :, 0]
     coor_y_1 = grid_y + flow[:, :, :, 1]

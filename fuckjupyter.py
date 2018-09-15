@@ -141,13 +141,13 @@ with tf.Graph().as_default():
     summaries.append(tf.summary.image('Target Image', target_placeholder, 3))
 
     # Create a saver.
-    saver = tf.train.Saver(tf.all_variables())
+    saver = tf.train.Saver(tf.global_variables())
 
     # Build the summary operation from the last tower summaries.
     summary_op = tf.summary.merge_all()
 
     # Build an initialization operation to run below.
-    init = tf.initialize_all_variables()
+    init = tf.global_variables_initializer()
     sess = tf.Session()
     sess.run(init)
 
@@ -229,12 +229,11 @@ with tf.Graph().as_default():
 
       if batch_idx == 0:
         # Shuffle data at each epoch.
-        random.seed(1)
-        shuffle(data_list_frame1)
-        random.seed(1)
-        shuffle(data_list_frame2)
-        random.seed(1)
-        shuffle(data_list_frame3)
+        #random.seed(1)
+        p = np.random.permutation(len(x1))
+        data_list_frame1 = x1[p]#np.expand_dims(x1[p], axis=3)
+        data_list_frame2 = target[p]#np.expand_dims(target[p], axis=3)
+        data_list_frame3 = x2[p]#np.expand_dims(x2[p], axis=3)
         print('Epoch Number: %d' % int(step / epoch_num))
 
       # Output Summary
