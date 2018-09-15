@@ -3,23 +3,23 @@
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import print_function
+#from __future__ import print_function
 
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 def bilinear_interp(im, x, y, name):
   """Perform bilinear sampling on im given x, y coordinates
-  
+
   This function implements the differentiable sampling mechanism with
   bilinear kernel. Introduced in https://arxiv.org/abs/1506.02025, equation
   (5).
- 
+
   x,y are tensors specfying normalized coorindates [-1,1] to sample from im.
   (-1,1) means (0,0) coordinate in im. (1,1) means the most bottom right pixel.
 
   Args:
-    im: Tensor of size [batch_size, height, width, depth] 
+    im: Tensor of size [batch_size, height, width, depth]
     x: Tensor of size [batch_size, height, width, 1]
     y: Tensor of size [batch_size, height, width, 1]
     name: String for the name for this opt.
@@ -27,11 +27,12 @@ def bilinear_interp(im, x, y, name):
     Tensor of size [batch_size, height, width, depth]
   """
   with tf.variable_scope(name):
-    x = tf.reshape(x, [-1]) 
-    y = tf.reshape(y, [-1]) 
+    x = tf.reshape(x, [-1])
+    y = tf.reshape(y, [-1])
 
     # constants
     num_batch = tf.shape(im)[0]
+    print(im.get_shape())
     _, height, width, channels = im.get_shape().as_list()
 
     x = tf.to_float(x)
@@ -57,7 +58,7 @@ def bilinear_interp(im, x, y, name):
     y0 = tf.clip_by_value(y0, zero, max_y)
     y1 = tf.clip_by_value(y1, zero, max_y)
 
-    dim2 = width 
+    dim2 = width
     dim1 = width * height
 
     # Create base index
@@ -66,9 +67,9 @@ def bilinear_interp(im, x, y, name):
     base = tf.tile(base, [1, height * width])
     base = tf.reshape(base, [-1])
 
-    base_y0 = base + y0 * dim2 
-    base_y1 = base + y1 * dim2 
-    idx_a = base_y0 + x0 
+    base_y0 = base + y0 * dim2
+    base_y1 = base + y1 * dim2
+    idx_a = base_y0 + x0
     idx_b = base_y1 + x0
     idx_c = base_y0 + x1
     idx_d = base_y1 + x1
@@ -81,7 +82,7 @@ def bilinear_interp(im, x, y, name):
     pixel_c = tf.gather(im_flat, idx_c)
     pixel_d = tf.gather(im_flat, idx_d)
 
-    # Interpolate the values 
+    # Interpolate the values
     x1_f = tf.to_float(x1)
     y1_f = tf.to_float(y1)
 
@@ -90,8 +91,14 @@ def bilinear_interp(im, x, y, name):
     wc = tf.expand_dims((1.0 - (x1_f - x)) * (y1_f - y), 1)
     wd = tf.expand_dims((1.0 - (x1_f - x)) * (1.0 - (y1_f - y)), 1)
 
-    output = tf.add_n([wa*pixel_a, wb*pixel_b, wc*pixel_c, wd*pixel_d]) 
+    #print(num_batch.get_shape())
+    #print(height.get_shape())
+    #print(width.get_shape())
+    #print(channels.get_shape())
+
+    output = tf.add_n([wa*pixel_a, wb*pixel_b, wc*pixel_c, wd*pixel_d])
     output = tf.reshape(output, shape=tf.stack([num_batch, height, width, channels]))
+
     return output
 
 def meshgrid(height, width):
@@ -113,7 +120,7 @@ def meshgrid(height, width):
     # grid_y = tf.reshape(y_t_flat, [1, height, width, 1])
     grid_x = tf.reshape(x_t_flat, [1, height, width])
     grid_y = tf.reshape(y_t_flat, [1, height, width])
-    return grid_x, grid_y 
+    return grid_x, grid_y
 
 def vae_gaussian_layer(network, is_train=True, scope='gaussian_layer'):
   """Implements a gaussian reparameterization vae layer"""

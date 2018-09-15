@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
-from utils.loss_utils import l1_loss, l2_loss, vae_loss 
+from utils.loss_utils import l1_loss, l2_loss, vae_loss
 from utils.geo_layer_utils import vae_gaussian_layer
 from utils.geo_layer_utils import bilinear_interp
 from utils.geo_layer_utils import meshgrid
@@ -18,7 +18,7 @@ class Voxel_flow_model(object):
     """Inference on a set of input_images.
     Args:
     """
-    return self._build_model(input_images) 
+    return self._build_model(input_images)
 
   def loss(self, predictions, targets):
     """Compute the necessary loss for training.
@@ -40,8 +40,8 @@ class Voxel_flow_model(object):
                         activation_fn=tf.nn.relu,
                         weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                         weights_regularizer=slim.l2_regularizer(0.0001)):
-      
-      # Define network      
+
+      # Define network
       batch_norm_params = {
         'decay': 0.9997,
         'epsilon': 0.001,
@@ -64,11 +64,11 @@ class Voxel_flow_model(object):
           net = slim.conv2d(net, 64, [5, 5], stride=1, scope='conv6')
     net = slim.conv2d(net, 3, [5, 5], stride=1, activation_fn=tf.tanh,
     normalizer_fn=None, scope='conv7')
-    
+
     flow = net[:, :, :, 0:2]
     mask = tf.expand_dims(net[:, :, :, 2], 3)
 
-    grid_x, grid_y = meshgrid(256, 256)
+    grid_x, grid_y = meshgrid(256, 256) #EDITED
     grid_x = tf.tile(grid_x, [32, 1, 1]) # batch_size = 32
     grid_y = tf.tile(grid_y, [32, 1, 1]) # batch_size = 32
 
@@ -78,13 +78,13 @@ class Voxel_flow_model(object):
     coor_y_1 = grid_y + flow[:, :, :, 1]
 
     coor_x_2 = grid_x - flow[:, :, :, 0]
-    coor_y_2 = grid_y - flow[:, :, :, 1]    
-    
-    output_1 = bilinear_interp(input_images[:, :, :, 0:3], coor_x_1, coor_y_1, 'interpolate')
-    output_2 = bilinear_interp(input_images[:, :, :, 3:6], coor_x_2, coor_y_2, 'interpolate')
+    coor_y_2 = grid_y - flow[:, :, :, 1]
+
+    output_1 = bilinear_interp(input_images[:, :, :, 0], coor_x_1, coor_y_1, 'interpolate')
+    output_2 = bilinear_interp(input_images[:, :, :, 1], coor_x_2, coor_y_2, 'interpolate')
 
     mask = 0.5 * (1.0 + mask)
     mask = tf.tile(mask, [1, 1, 1, 3])
-    net = tf.mul(mask, output_1) + tf.mul(1.0 - mask, output_2)
+    net = tf.multiply(mask, output_1) + tf.multiply(1.0 - mask, output_2)
 
     return net

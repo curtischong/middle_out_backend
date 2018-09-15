@@ -10,6 +10,8 @@ from utils.geo_layer_utils import vae_gaussian_layer
 from utils.geo_layer_utils import bilinear_interp
 from utils.geo_layer_utils import meshgrid
 
+import sys
+
 
 class Voxel_flow_model(object):
   def __init__(self, is_train=True):
@@ -83,13 +85,23 @@ class Voxel_flow_model(object):
     coor_x_2 = grid_x - flow[:, :, :, 0]
     coor_y_2 = grid_y - flow[:, :, :, 1]
 
+    # print('hi')
+    # print(input_images)
+    # print(':)')
+    # print(type(input_images))
+    # print(input_images.get_shape())
+    # print(input_images[:, :, :, 0])
+    # print(
+    #     input_images[:, :, :, 0], coor_x_1, coor_y_1, 'interpolate')
     output_1 = bilinear_interp(
-        input_images[:, :, :, 0:3], coor_x_1, coor_y_1, 'interpolate')
+        input_images[:, :, :, 0:1], coor_x_1, coor_y_1, 'interpolate')
     output_2 = bilinear_interp(
-        input_images[:, :, :, 3:6], coor_x_2, coor_y_2, 'interpolate')
+        input_images[:, :, :, 1:2], coor_x_2, coor_y_2, 'interpolate')
+
 
     mask = 0.5 * (1.0 + mask)
-    mask = tf.tile(mask, [1, 1, 1, 3])
-    net = tf.mul(mask, output_1) + tf.mul(1.0 - mask, output_2)
+    mask = tf.tile(mask, [1, 1, 1, 2])
+    net = tf.multiply(mask, output_1) + tf.multiply(1.0 - mask, output_2)
+    print(net)
 
     return net
