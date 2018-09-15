@@ -73,16 +73,11 @@ class Voxel_flow_model(object):
     flow = net[:, :, :, 0:2]
     mask = tf.expand_dims(net[:, :, :, 2], 3)
 
-    print("about to create mesh")
     grid_x, grid_y = meshgrid(256, 256)
     grid_x = tf.tile(grid_x, [3, 1, 1])  # batch_size = 32
     grid_y = tf.tile(grid_y, [3, 1, 1])  # batch_size = 32
 
     flow = 0.5 * flow
-
-    print("still running")
-    print(grid_x.shape)
-    print(flow.shape)
 
     coor_x_1 = grid_x + flow[:, :, :, 0]
     coor_y_1 = grid_y + flow[:, :, :, 1]
@@ -90,14 +85,6 @@ class Voxel_flow_model(object):
     coor_x_2 = grid_x - flow[:, :, :, 0]
     coor_y_2 = grid_y - flow[:, :, :, 1]
 
-    # print('hi')
-    # print(input_images)
-    # print(':)')
-    # print(type(input_images))
-    # print(input_images.get_shape())
-    # print(input_images[:, :, :, 0])
-    # print(
-    #     input_images[:, :, :, 0], coor_x_1, coor_y_1, 'interpolate')
     output_1 = bilinear_interp(
         input_images[:, :, :, 0:1], coor_x_1, coor_y_1, 'interpolate')
     output_2 = bilinear_interp(
@@ -107,7 +94,5 @@ class Voxel_flow_model(object):
     mask = 0.5 * (1.0 + mask)
     mask = tf.tile(mask, [1, 1, 1, 1])
     net = tf.multiply(mask, output_1) + tf.multiply(1.0 - mask, output_2)
-    print(net)
-    print("the shape of the neural net")
-    print(net.get_shape())
+
     return net
