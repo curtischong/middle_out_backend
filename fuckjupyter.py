@@ -65,7 +65,7 @@ for x in onlyfiles:
     newFrame(input_path + "/" + x)
 
 frames = np.array(frames)
-np.expand_dims(frames, axis=3).shape
+
 target = []
 x1 = []
 x2 = []
@@ -88,7 +88,6 @@ print(target.shape)
 print(x1.shape)
 print(x2.shape)
 
-np.stack((x1,x2), axis=3).shape
 x = np.stack((x1,x2), axis=3)
 
 
@@ -144,17 +143,28 @@ with tf.Graph().as_default():
         graph=sess.graph)
 
     # Training loop using feed dict method.
-    data_list_frame1 = dataset_frame1.read_data_list_file()
+    #data_list_frame1 = dataset_frame1.read_data_list_file()
+    """data_list_frame1 = np.expand_dims(x1, axis=3)
     random.seed(1)
     shuffle(data_list_frame1)
 
-    data_list_frame2 = dataset_frame2.read_data_list_file()
+    #data_list_frame2 = dataset_frame2.read_data_list_file()
+    data_list_frame2 = np.expand_dims(target, axis=3)
     random.seed(1)
     shuffle(data_list_frame2)
 
-    data_list_frame3 = dataset_frame3.read_data_list_file()
+    #data_list_frame3 = dataset_frame3.read_data_list_file()
+    data_list_frame1 = np.expand_dims(x2, axis=3)
     random.seed(1)
-    shuffle(data_list_frame3)
+    shuffle(data_list_frame3)"""
+
+    p = np.random.permutation(len(x1))
+    data_list_frame1 = np.expand_dims(x1[p], axis=3)
+    data_list_frame2 = np.expand_dims(target[p], axis=3)
+    data_list_frame3 = np.expand_dims(x2[p], axis=3)
+
+
+
 
     data_size = len(data_list_frame1)
     epoch_num = int(data_size / FLAGS.batch_size)
@@ -170,7 +180,9 @@ with tf.Graph().as_default():
     # load_fn_frame3 = partial(dataset_frame3.process_func)
     # p_queue_frame3 = PrefetchQueue(load_fn_frame3, data_list_frame3, FLAGS.batch_size, shuffle=False, num_workers=num_workers)
 
-    for step in xrange(0, FLAGS.max_steps):
+    print("starting training")
+
+    for step in range(0, FLAGS.max_steps):
       batch_idx = step % epoch_num
 
       batch_data_list_frame1 = data_list_frame1[int(
