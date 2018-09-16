@@ -1,26 +1,29 @@
 from flask import Flask, request, jsonify
 from PIL import Image
-import numpy
+from io import BytesIO
+import base64
+import sqlite3
+import hashlib
 
 app = Flask(__name__)
+conn = sqlite3.connect('frames.db')
+c = conn.cursor()
+c.execute('CREATE TABLE frames (index real, filename text)')
+c.commit()
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    framecount = int(request.form['framecount'])
-    frames = [None] * framecount
-    for i in range(framecount):
-        img = Image.open(request.files[str(i)]).convert('1')
-        try: 
-            assert img.size[0] == 1397
-            assert img.size[1] == 512
-        except:
-            return jsonify({
-                'success': False,
-                'error': 'Invalid image size',
-                'index': i
-            }), 400
-        frames[i] = numpy.array(img.getdata()).reshape(img.size[0], img.size[1], 1)
-    return jsonify({'success': True}), 200
+    json = request.get_json()
+    index = int(json['index'])
+    raw = BytesIo(base64.b64decode(json['uri'].split(',')[1]))
+    img = Image.open(raw)
+    checksum = hashlib.sha256()
+    checksum.update(raw)
+    name = checksum.hexdigest()
+    img.save('/var/www/static/{:s}.png'.format(name))
+    c.execute('INSERT INTO frames (?,?)', (index, name,))
+    c.commit()
+    return jsonify({'file': '{:s}.png'.format(name)}), 200
 
 if __name__ == '__main__':
     app.run()
