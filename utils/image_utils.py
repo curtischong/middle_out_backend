@@ -53,7 +53,7 @@ def imwrite_better(filename, np_image):
   im = im.convert('RGB')
   im = im.filter(ImageFilter.SHARPEN)
   im.convert('RGB').save(filename)
-
+  
 def imwrite_batch(filenames, np_images):
   """Save batch images to file.
   Args:
