@@ -55,25 +55,26 @@ class Voxel_flow_model(object):
       with slim.arg_scope([slim.batch_norm], is_training=self.is_train, updates_collections=None):
         with slim.arg_scope([slim.conv2d], normalizer_fn=slim.batch_norm,
                             normalizer_params=batch_norm_params):
-          net = slim.conv2d(input_images, 64, [5, 5], stride=1, scope='conv1')
-          net = slim.max_pool2d(net, [2, 2], scope='pool1')
-          net = slim.conv2d(net, 128, [5, 5], stride=1, scope='conv2')
-          net = slim.max_pool2d(net, [2, 2], scope='pool2')
-          net = slim.conv2d(net, 256, [3, 3], stride=1, scope='conv3')
-          net = slim.max_pool2d(net, [2, 2], scope='pool3')
-          net = tf.image.resize_bilinear(net, [64, 64])
-          net = slim.conv2d(net, 256, [3, 3], stride=1, scope='conv4')
+          net = slim.conv2d(input_images, 128, [10, 10], stride=1, scope='conv1')
+          net = slim.max_pool2d(net, [4, 4], scope='pool1')
+          net = slim.conv2d(net, 256, [10, 10], stride=1, scope='conv2')
+          net = slim.max_pool2d(net, [4, 4], scope='pool2')
+          net = slim.conv2d(net, 512, [6, 6], stride=1, scope='conv3')
+          net = slim.max_pool2d(net, [4, 4], scope='pool3')
+
           net = tf.image.resize_bilinear(net, [128, 128])
-          net = slim.conv2d(net, 128, [3, 3], stride=1, scope='conv5')
+          net = slim.conv2d(net, 512, [6, 6], stride=1, scope='conv4')
           net = tf.image.resize_bilinear(net, [256, 256])
-          net = slim.conv2d(net, 64, [5, 5], stride=1, scope='conv6')
-    net = slim.conv2d(net, 3, [5, 5], stride=1, activation_fn=tf.tanh,
+          net = slim.conv2d(net, 256, [6, 6], stride=1, scope='conv5')
+          net = tf.image.resize_bilinear(net, [512, 512])
+          net = slim.conv2d(net, 128, [10, 10], stride=1, scope='conv6')
+    net = slim.conv2d(net, 3, [10, 10], stride=1, activation_fn=tf.tanh,
                       normalizer_fn=None, scope='conv7')
 
     flow = net[:, :, :, 0:2]
     mask = tf.expand_dims(net[:, :, :, 2], 3)
 
-    grid_x, grid_y = meshgrid(256, 256)
+    grid_x, grid_y = meshgrid(512, 512)
     grid_x = tf.tile(grid_x, [3, 1, 1])  # batch_size = 32
     grid_y = tf.tile(grid_y, [3, 1, 1])  # batch_size = 32
 

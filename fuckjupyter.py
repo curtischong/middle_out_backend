@@ -127,8 +127,8 @@ print("frame shape:", target.shape)
 
 with tf.Graph().as_default():
     # Create input and target placeholder.
-    input_placeholder = tf.placeholder(tf.float32, shape=(3, 256, 256, 2))
-    target_placeholder = tf.placeholder(tf.float32, shape=(3, 256, 256, 1))
+    input_placeholder = tf.placeholder(tf.float32, shape=(3, 512, 512, 2))
+    target_placeholder = tf.placeholder(tf.float32, shape=(3, 512, 512, 1))
 
     # input_resized = tf.image.resize_area(input_placeholder, [128, 128])
     # target_resized = tf.image.resize_area(target_placeholder,[128, 128])

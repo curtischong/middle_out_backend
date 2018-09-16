@@ -15,11 +15,11 @@ def newFrame(cur_filepath):
     # Pad image with whitespace
     max_size = max(img.size[0], img.size[1])
     new_size = (max_size, max_size)
-    padded = Image.new('1', new_size, 255)
+    padded = Image.new('1', new_size, 512)
     padded.paste(img, ((new_size[0]-img.size[0])//2, (new_size[1]-img.size[1])//2))
     # Scale image to 256/256
-    padded.thumbnail((256,256))
-    return array(padded.getdata(), np.uint8).reshape(256, 256, 1)
+    padded.thumbnail((512,512))
+    return array(padded.getdata(), np.uint8).reshape(512, 512, 1)
 
 
 frames = []
@@ -32,13 +32,17 @@ for path in subdirectories[1:]:
     onlyfiles = [fn for fn in os.listdir(path)
                   if any(fn.endswith(ext) for ext in included_extensions)]
     for one_file in onlyfiles:
-        cur_frames.append(newFrame(path + "/" + one_file))
+        try:
+            the_frame = newFrame(path + "/" + one_file)
+            cur_frames.append(the_frame)
+        except:
+            print("failed " + str(path))
     print("finished reading directory: " + path)
     frames.append(cur_frames)
 
-frames = np.array(frames)
+import json
 
-print("frame shape:", frames.shape)
+with open('data.json', 'w') as outfile:
+    json.dump(frames, outfile)
 
-
-np.save("frames.npy", frames)
+#np.save("frames.npy", frames)
