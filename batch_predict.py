@@ -66,10 +66,10 @@ x2 = []
 path = "input_frames"
 cur_frames = []
 included_extensions = ['jpg', 'bmp', 'png', 'gif']
-    onlyfiles = [fn for fn in os.listdir(path)
-                  if any(fn.endswith(ext) for ext in included_extensions)]
-    for one_file in onlyfiles:
-        cur_frames.append(newFrame(path + "/" + one_file))
+onlyfiles = [fn for fn in os.listdir(path)
+                if any(fn.endswith(ext) for ext in included_extensions)]
+for one_file in onlyfiles:
+    cur_frames.append(newFrame(path + "/" + one_file))
 
 for idx in range(len(cur_frames) - 1):
     x1.append(cur_frames[idx])
