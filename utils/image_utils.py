@@ -1,6 +1,7 @@
 import numpy as np
 import scipy as sp
 from PIL import Image
+from PIL import ImageFilter
 from scipy import misc
 
 
@@ -36,6 +37,21 @@ def imwrite(filename, np_image):
   #im = sp.misc.toimage(np_image.reshape(256,256), cmin=-1.0, cmax=1.0)
   #im = sp.misc.toimage(np_image.reshape(1280,720), cmin=-1.0, cmax=1.0)
   im = Image.fromarray(np_image.reshape([256, 256]))
+  im.convert('RGB').save(filename)
+
+def imwrite_better(filename, np_image):
+  """Save image to file.
+  Args:
+    filename: .
+    np_image: .
+  """
+  #im = sp.misc.toimage(np_image, cmin=0, cmax=1.0)
+  #im = sp.misc.toimage(np_image.reshape(256,256), cmin=-1.0, cmax=1.0)
+  #im = sp.misc.toimage(np_image.reshape(1280,720), cmin=-1.0, cmax=1.0)
+  im = Image.fromarray(np_image.reshape([256, 256]))
+  #im.show()
+  im = im.convert('RGB')
+  im = im.filter(ImageFilter.SHARPEN)
   im.convert('RGB').save(filename)
 
 def imwrite_batch(filenames, np_images):

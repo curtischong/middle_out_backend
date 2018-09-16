@@ -4,6 +4,7 @@ import re
 import tensorflow as tf
 from voxel_flow_model import Voxel_flow_model
 from utils.image_utils import imwrite
+from utils.image_utils import imwrite_better
 import sys
 
 IMG_WIDTH = 256
@@ -51,38 +52,7 @@ onlyfiles[:2]
 from PIL import Image
 from numpy import*
 
-frames = []
-def newFrame(cur_filepath):
-    # Convert image to black and white
-    img = Image.open(cur_filepath).convert('1')
-    # Pad image with whitespace
-    max_size = max(img.size[0], img.size[1])
-    new_size = (max_size, max_size)
-    padded = Image.new('1', new_size, 255)
-    padded.paste(img, ((new_size[0]-img.size[0])//2, (new_size[1]-img.size[1])//2))
-    # Scale image to 256/256
-    padded.thumbnail((256,256))
-    #padded.show()
-    #sys.exit(1)
-    # Add frame array to list
-    #print(array(padded.getdata(), uint8).reshape(256, 256, 1))
-    frames.append(array(padded.getdata(), uint8).reshape(256, 256, 1))
-    #test_array = array(padded.getdata(), uint8).reshape(256, 256, 1)
-    #print(test_array.shape)
-    #test_array = test_array.reshape([720, 1280])
-    #img.show()
-    #Image.fromarray(test_array.reshape([256, 256])).show()
-    #sys.exit(1)
-    #Image.fromarray(test_array.reshape([720, 1280])).show()
-    #Image.fromarray(test_array, '1').show()
-    #Image.fromarray(test_array.transpose(), '1').show()
-    #sys.exit(1)
-    #img.show()
 
-for x in onlyfiles:
-    newFrame(input_path + "/" + x)
-
-frames = np.array(frames)
 
 # crop to center of image
 # I might want an assert statement to make sure that the dimensions fit the input.
@@ -95,34 +65,65 @@ frames = np.array(frames)
 
 #REMEMBER TO CHANGE THE imwrite function!!!!!!
 
-for i in range(len(frames)):
+"""for i in range(len(frames)):
     file_name = "input_pics/"+str(i)+'_input.png'
     print(frames[i, :, :, :].shape)
-    imwrite(file_name, frames[i, :, :, :])
+    imwrite(file_name, frames[i, :, :, :])"""
+
+frames = np.load('frames.npy')
+
+print("frame shape:")
+print(frames.shape)
 
 
+def flip_frames(frame):
+    frames_horiz = np.fliplr(frame)
+    frames_vert = np.flipud(frame)
+    frames_horiz_vert = np.flipud(np.fliplr(frame))
 
-
-
-
+    return (frame, frames_horiz, frames_vert, frames_horiz_vert)
 
 
 target = []
 x1 = []
 x2 = []
 def middle_out(frame1, frame2, frame3):
-    target.append(frame2)
-    x1.append(frame1)
-    x2.append(frame3)
+    a,b,c,d = flip_frames(frame2)
+    target.append(a)
+    target.append(b)
+    target.append(c)
+    target.append(d)
+
+    a1,b1,c1,d1 = flip_frames(frame1)
+    x1.append(a1)
+    x1.append(b1)
+    x1.append(c1)
+    x1.append(d1)
+
+    a2,b2,c2,d2 = flip_frames(frame3)
+    x2.append(a2)
+    x2.append(b2)
+    x2.append(c2)
+    x2.append(d2)
+
 
 def pick_out_frames(cur_scene):
     for idx in range(0,len(cur_scene)-2):
         middle_out(cur_scene[idx], cur_scene[idx + 1], cur_scene[idx + 2])
 
-pick_out_frames(frames)
+
+for dir in frames:
+    pick_out_frames(dir)
+
 target = np.array(target)
 x1 = np.array(x1)
 x2 = np.array(x2)
+
+print("frame shape:", target.shape)
+
+
+
+
 
 with tf.Graph().as_default():
     # Create input and target placeholder.
@@ -222,12 +223,17 @@ with tf.Graph().as_default():
         prediction_np, target_np = sess.run(
             [prediction, target_placeholder], feed_dict=feed_dict)
         for i in range(0, prediction_np.shape[0]):
-          file_name = FLAGS.train_image_dir+str(i)+'_out.png'
+          file_name = FLAGS.train_image_dir+str(i)+'_out_bad.png'
           file_name_label = FLAGS.train_image_dir+str(i)+'_gt.png'
           imwrite(file_name, prediction_np[i, :, :, :])
           imwrite(file_name_label, target_np[i, :, :, :])
+
+          file_name_better = FLAGS.train_image_dir+str(i)+'_out_bad.png'
+          imwrite_better(file_name_better, target_np[i, :, :, :])
+
 
       # Save checkpoint
       if step % 5000 == 0 or (step + 1) == FLAGS.max_steps:
         checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
         saver.save(sess, checkpoint_path, global_step=step)
+

@@ -2,3 +2,5 @@ venv/
 voxel_flow_checkpoints/
 voxel_flow_train_image/
 __pycache__/
+OUTPUT/
+frames.npy
