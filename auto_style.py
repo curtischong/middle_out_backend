@@ -1,4 +1,5 @@
 import subprocess
+import os
 
 path = "style_input"
 cur_frames = []

@@ -1,0 +1,55 @@
+def predict():
+  """Perform test on a trained model."""
+  with tf.Graph().as_default():
+                # Create input and target placeholder.
+    input_placeholder = tf.placeholder(tf.float32, shape=(3, 256, 256, 2))
+    target_placeholder = tf.placeholder(tf.float32, shape=(3, 256, 256, 1))
+
+    # input_resized = tf.image.resize_area(input_placeholder, [128, 128])
+    # target_resized = tf.image.resize_area(target_placeholder,[128, 128])
+
+    # Prepare model.
+    model = Voxel_flow_model(is_train=True)
+    prediction = model.inference(input_placeholder)
+    # reproduction_loss, prior_loss = model.loss(prediction, target_placeholder)
+    reproduction_loss = model.loss(prediction, target_placeholder)
+    # total_loss = reproduction_loss + prior_loss
+    total_loss = reproduction_loss
+
+    # Create a saver and load.
+    saver = tf.train.Saver(tf.all_variables())
+
+    sess = tf.Session()
+
+    # Restore checkpoint from file.
+    if FLAGS.pretrained_model_checkpoint_path:
+      assert tf.gfile.Exists(FLAGS.pretrained_model_checkpoint_path)
+      ckpt = tf.train.get_checkpoint_state(
+               FLAGS.pretrained_model_checkpoint_path)
+      restorer = tf.train.Saver()
+      restorer.restore(sess, ckpt.model_checkpoint_path)
+      print('%s: Pre-trained model restored from %s' %
+        (datetime.now(), ckpt.model_checkpoint_path))
+
+    # Process on test dataset.
+    data_list_frame1 = pic1
+    data_size = len(data_list_frame1)
+    epoch_num = int(data_size / FLAGS.batch_size)
+
+    data_list_frame2 = pic2
+    data_list_frame3 = pic2
+
+    # Load single data.
+    line_image_frame1 = np.array([data_list_frame1,data_list_frame1,data_list_frame1])
+    line_image_frame2 = np.array([data_list_frame2,data_list_frame2,data_list_frame2])
+    line_image_frame3 = np.array([data_list_frame3,data_list_frame3,data_list_frame3])
+
+    print(line_image_frame1.shape)
+
+    feed_dict = {input_placeholder: np.concatenate((line_image_frame1, line_image_frame3), 3),
+                target_placeholder: line_image_frame2}
+    # Run single step update.
+    prediction_np, target_np, loss_value = sess.run([prediction,
+                                                    target_placeholder,
+                                                    total_loss],
+                                                    feed_dict = feed_dict)
