@@ -1,5 +1,6 @@
 # middle_out_backend
 
+Interested in the front-end? Visit it [here](https://github.com/marceloneil/piepiper)
 
 ## REST server
 Small flask app for communicating with the client
